@@ -1,0 +1,13 @@
+name: computer_info
+description: Gets computer hardware info on Windows using Powershell.
+version: 1.0.0
+repository: https://github.com/willhuff0/computer_info
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  collection: ^1.19.0
+
+dev_dependencies:
+  lints: ^4.0.0
