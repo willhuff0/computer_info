@@ -39,7 +39,7 @@ class Computer {
   final String biosVersion; // BiosName
   final String mbModel; // CsModel
   final String mbManufacturer; // CsManufacturer
-  final double totalMemorySize; // CsPhyicallyInstalledMemory, KiB -> GiB
+  final int totalMemorySize; // CsPhyicallyInstalledMemory, KiB -> GiB
 
   Computer({required this.osVersion, required this.biosVersion, required this.mbModel, required this.mbManufacturer, required this.totalMemorySize});
 
@@ -52,11 +52,11 @@ class Computer {
     final json = jsonDecode(result.stdout);
 
     return Computer(
-      osVersion: json['OSDisplayVersion'],
-      biosVersion: json['BiosName'],
-      mbModel: json['CsModel'],
-      mbManufacturer: json['CsManufacturer'],
-      totalMemorySize: json['CsPhyicallyInstalledMemory'] / 1048576,
+      osVersion: json['OSDisplayVersion'].trim(),
+      biosVersion: json['BiosName'].trim(),
+      mbModel: json['CsModel'].trim(),
+      mbManufacturer: json['CsManufacturer'].trim(),
+      totalMemorySize: json['CsPhyicallyInstalledMemory'],
     );
   }
 }
@@ -80,11 +80,11 @@ class Processor {
     final json = jsonDecode(result.stdout);
 
     return Processor(
-      name: json['Name'],
+      name: json['Name'].trim(),
       speed: json['MaxClockSpeed'],
       threads: json['NumberOfLogicalProcessors'],
       cores: json['NumberOfCores'],
-      socket: json['SocketDesignation'],
+      socket: json['SocketDesignation'].trim(),
     );
   }
 }
@@ -92,7 +92,7 @@ class Processor {
 // Get-WmiObject Win32_PhysicsMemory [i]
 class Memory {
   final String bank; // BankLabel
-  final double size; // Capacity, KiB -> GiB
+  final int size; // Capacity, KiB -> GiB
   final int speed; // Speed (MHz)
   final MemoryType type; // MemoryType
 
@@ -108,8 +108,8 @@ class Memory {
 
     return (json as List)
         .map((memory) => Memory(
-              bank: memory['BankLabel'],
-              size: memory['Capacity'] / 1048576,
+              bank: memory['BankLabel'].trim(),
+              size: memory['Capacity'],
               speed: memory['Speed'],
               type: MemoryType.values.elementAtOrNull(memory['MemoryType']) ?? MemoryType.Unknown,
             ))
@@ -149,7 +149,7 @@ enum MemoryType {
 // Get-WmiObject Win32_VideoController [i]
 class VideoController {
   final String name; // Name
-  final double vram; // AdapterRAM, KiB -> GiB
+  final int vram; // AdapterRAM, KiB -> GiB
 
   VideoController({required this.name, required this.vram});
 
@@ -163,8 +163,8 @@ class VideoController {
 
     return (json as List)
         .map((videoController) => VideoController(
-              name: videoController['Name'],
-              vram: videoController['AdapterRAM'] / 1048576,
+              name: videoController['Name'].trim(),
+              vram: videoController['AdapterRAM'],
             ))
         .toList();
   }
@@ -173,7 +173,7 @@ class VideoController {
 // Get-PhysicalDisk [i]
 class Disk {
   final String name; // FriendlyName
-  final double size; // Size, Byte -> GB
+  final int size; // Size, Byte -> GB
   final DiskType type; // MediaType
   final DiskInterface interface; // BusType
   final DiskStatus status; // OperationalStatus
@@ -191,11 +191,11 @@ class Disk {
 
     return (json as List)
         .map((disk) => Disk(
-              name: disk['FriendlyName'],
-              size: disk['Size'] / 1073741824,
-              type: DiskType.values.asNameMap()[disk['MediaType']] ?? DiskType.Other,
-              interface: DiskInterface.values.asNameMap()[disk['BusType']] ?? DiskInterface.Other,
-              status: DiskStatus.values.firstWhereOrNull((diskStatus) => diskStatus.value == disk['OperationalStatus']) ?? DiskStatus.Other,
+              name: disk['FriendlyName'].trim(),
+              size: disk['Size'],
+              type: DiskType.values.asNameMap()[disk['MediaType'].trim()] ?? DiskType.Other,
+              interface: DiskInterface.values.asNameMap()[disk['BusType'].trim()] ?? DiskInterface.Other,
+              status: DiskStatus.values.firstWhereOrNull((diskStatus) => diskStatus.value == disk['OperationalStatus'].trim()) ?? DiskStatus.Other,
               health: disk['HealthStatus'],
             ))
         .toList();
